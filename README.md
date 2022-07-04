@@ -2,7 +2,7 @@
 
 ![License: MIT](https://img.shields.io/npm/l/themthem)
 
-Themthem is a library of tools which lets you manage your CSS variables and tokens based on a Typescript interface.
+Themthem (pronounced like "temtem" `/temtem/`) is a library of tools which lets you manage your CSS variables and tokens based on a Typescript interface.
 
 ## Install
 
