@@ -5,6 +5,12 @@ Themthem is a library of tools which lets you manage your CSS variables and toke
 ## Install
 
 ```shell
+npm install --save themthem
+```
+
+or using yarn
+
+```shell
 yarn add themthem
 ```
 
