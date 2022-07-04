@@ -2,7 +2,11 @@
   "name": "themthem",
   "version": "0.0.0",
   "license": "MIT",
-  "keywords": ["css variable", "typescript", "design token", "styled-components"],
+  "keywords": ["css variable", "typescript", "design token", "styled-components", "css theme"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChibiBlasphem/themthem.git"
+  },
   "types": "./dist/index.d.ts",
   "main": "./dist/themthem.umd.js",
   "module": "./dist/themthem.es.js",
