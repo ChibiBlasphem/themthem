@@ -1,4 +1,6 @@
-# Themthem ![License: MIT](https://img.shields.io/github/license/ChibiBlasphem/themthem)
+# Themthem
+
+![License: MIT](https://img.shields.io/npm/l/themthem)
 
 Themthem is a library of tools which lets you manage your CSS variables and tokens based on a Typescript interface.
 
