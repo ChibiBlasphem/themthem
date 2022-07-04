@@ -1,6 +1,8 @@
 {
   "name": "themthem",
   "version": "0.0.0",
+  "license": "MIT",
+  "keywords": ["css variable", "typescript", "design token", "styled-components"],
   "types": "./dist/index.d.ts",
   "main": "./dist/themthem.umd.js",
   "module": "./dist/themthem.es.js",
