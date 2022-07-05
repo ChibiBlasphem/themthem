@@ -1,3 +1,10 @@
+## [0.1.3](https://github.com/ChibiBlasphem/themthem/compare/v0.1.2...v0.1.3) (2022-07-05)
+
+
+### Bug Fixes
+
+* fix interface augmentation from client ([fe19806](https://github.com/ChibiBlasphem/themthem/commit/fe19806d819a183a4a425a586481445ee51eb2b4))
+
 ## [0.1.2](https://github.com/ChibiBlasphem/themthem/compare/v0.1.1...v0.1.2) (2022-07-04)
 
 
