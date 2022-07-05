@@ -1,12 +1,12 @@
-import type {
-  GlobalDesignTokenBox as GDT,
-  ComponentDesignTokenBox as CDT,
-  TokenBoxKey,
-  Token,
-} from './token-box';
+/// <reference path="../interfaces.d.ts" />
+
+import type { TokenBoxKey, Token } from './token-box';
 import type { ThemthemVariable } from './helpers';
 import { cssToken } from './helpers';
 import { getKeys } from './utils';
+
+type GDT = GlobalDesignTokenBox;
+type CDT = ComponentDesignTokenBox;
 
 export type Source<C extends keyof GDT | keyof CDT> = C extends keyof GDT
   ? GDT[C]

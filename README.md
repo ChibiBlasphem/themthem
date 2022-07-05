@@ -23,25 +23,25 @@ All the helpers of the API are based on type to augment from `themthem`.
 
 ### Define your global design tokens
 
-In the root of your sources (eg: `./src`) create a `themthem.d.ts` and augment the `GlobalDesignTokenBox` interface of `themthem`.
+In the root of your sources (eg: `./src`) create a `themthem-interfaces.d.ts` and augment the `GlobalDesignTokenBox` interface of `themthem`.
 
 ```ts
-declare module 'themthem' {
-    export interface GlobalDesignTokenBox {
-        colors: ['black', 'white', 'my-custom-color']
-    }
+/// <reference types="themthem/interfaces" />
+
+interface GlobalDesignTokenBox {
+    colors: ['black', 'white', 'my-custom-color']
 }
 ```
 
 ### Define component design tokens
 
-To define component token you need to augment `ComponentDesignTokenBox`. You can do the same as the global design tokens but it's recommended to directly augment the interface on the same file as your component.
+To define component token you need to augment `ComponentDesignTokenBox`. It's recommended to create a new definition file (`.d.ts`) aside your component when defining a new component design tokens (for example: `Input.themthem.d.ts`).
 
 ```ts
-declare module 'themthem' {
-    export interface ComponentDesignTokenBox {
-        input: ['background-color', 'color', 'border-color', 'border-size']
-    }
+/// <reference types="themthem/interfaces" />
+
+interface ComponentDesignTokenBox {
+    Input: ['background-color', 'color', 'border-color', 'border-size']
 }
 ```
 

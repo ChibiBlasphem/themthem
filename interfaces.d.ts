@@ -1,0 +1,2 @@
+interface GlobalDesignTokenBox {}
+interface ComponentDesignTokenBox {}

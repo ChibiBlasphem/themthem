@@ -1,5 +1,4 @@
-export interface GlobalDesignTokenBox {}
-export interface ComponentDesignTokenBox {}
+/// <reference path="../interfaces.d.ts" />
 
 export interface Themthem {
   global: GlobalDesignTokenBox;
