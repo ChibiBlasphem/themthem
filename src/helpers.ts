@@ -1,31 +1,35 @@
-import { DTBoxType, DTBoxKey, DesignToken } from './token-box';
+import { DTBoxType, DTBoxKey, DesignToken, Themthem } from './token-box';
 
 export type ThemthemToken<
-  Type extends DTBoxType,
-  K extends DTBoxKey<Type> & string,
-  TToken extends DesignToken<Type, K>,
-> = Type extends 'global' ? `--global-${K}-${TToken}` : `--${K}-${TToken}`;
+  TType extends DTBoxType<T>,
+  K extends DTBoxKey<TType, T> & string,
+  TToken extends DesignToken<TType, K, T>,
+  T extends Themthem = Themthem,
+> = TType extends 'global' ? `--global-${K}-${TToken}` : `--${K}-${TToken}`;
 
 export type ThemthemVariable<
-  Type extends DTBoxType,
-  K extends DTBoxKey<Type> & string,
-  TToken extends DesignToken<Type, K>,
-> = `var(${ThemthemToken<Type, K, TToken>})`;
+  TType extends DTBoxType<T>,
+  K extends DTBoxKey<TType, T> & string,
+  TToken extends DesignToken<TType, K, T>,
+  T extends Themthem = Themthem,
+> = `var(${ThemthemToken<TType, K, TToken, T>})`;
 
 export function cssToken<
-  Type extends DTBoxType,
-  K extends DTBoxKey<Type> & string,
-  TToken extends DesignToken<Type, K>,
->(type: Type, key: K, token: TToken): ThemthemToken<Type, K, TToken> {
+  TType extends DTBoxType<T>,
+  K extends DTBoxKey<TType, T> & string,
+  TToken extends DesignToken<TType, K, T>,
+  T extends Themthem = Themthem,
+>(type: TType, key: K, token: TToken): ThemthemToken<TType, K, TToken, T> {
   return (
     type === 'global' ? `--global-${key}-${token}` : `--${key}-${token}`
-  ) as ThemthemToken<Type, K, TToken>;
+  ) as ThemthemToken<TType, K, TToken, T>;
 }
 
 export function cssVariable<
-  Type extends DTBoxType,
-  K extends DTBoxKey<Type> & string,
-  TToken extends DesignToken<Type, K>,
->(type: Type, key: K, token: TToken): ThemthemVariable<Type, K, TToken> {
-  return `var(${cssToken(type, key, token)})`;
+  TType extends DTBoxType<T>,
+  K extends DTBoxKey<TType, T> & string,
+  TToken extends DesignToken<TType, K, T>,
+  T extends Themthem = Themthem,
+>(type: TType, key: K, token: TToken): ThemthemVariable<TType, K, TToken, T> {
+  return `var(${cssToken<TType, K, TToken, T>(type, key, token)})`;
 }
