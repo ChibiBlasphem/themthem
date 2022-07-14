@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/ChibiBlasphem/themthem/compare/v0.1.3...v0.2.0) (2022-07-14)
+
+
+### Features
+
+* rework public api ([#7](https://github.com/ChibiBlasphem/themthem/issues/7)) ([ed30c57](https://github.com/ChibiBlasphem/themthem/commit/ed30c5784465693f078839c6aa6d148c510bbf66))
+
 ## [0.1.3](https://github.com/ChibiBlasphem/themthem/compare/v0.1.2...v0.1.3) (2022-07-05)
 
 
