@@ -29,7 +29,8 @@ In the root of your sources (eg: `./src`) create a `themthem-interfaces.d.ts` an
 /// <reference types="themthem/interfaces" />
 
 interface GlobalDesignTokenBox {
-    colors: ['black', 'white', 'my-custom-color']
+    colors: ['black', 'white', 'my-custom-color'];
+    sizes: ['sm', 'md', 'lg', 'xl']
 }
 ```
 
@@ -45,29 +46,95 @@ interface ComponentDesignTokenBox {
 }
 ```
 
-### Retrieve a token
+## API
 
-`cssToken` is used to retrieve a token.  
-Based on the interfaces above:
-```ts
-import { cssToken } from 'themthem';
+All the functions of the API is based on `GlobalDesignTokenBox` and `ComponentDesignTokenBox` by default.  
+So the example on this section will all be based on the augmentation done in the [Usage](#usage) section.
 
-cssToken('global', 'color', 'black'); // --global-color-black
-cssToken('component', 'input', 'border-size'); // --input-border-size
-```
+### `cssVariable(type, key, token, options?)`
 
-### Using a variable
+Generate a CSS Variable based on your theme.
 
-Using a variable works the same as retrieving a token, but you will use `cssVariable`
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| type | `'global' \| 'component'` | The type of token you want. `'global'` for GlobalDesignTokens or `'component'` for ComponentDesignToken ||
+| key  | `keyof Themthem[typeof type]` | The global design token category or component name ||
+| token | `Themthem[typeof type][typeof key][number]` | The token token inside the category/component ||
+| options | `{ bare?: boolean } \| undefined` | Whether you want the bare css variable or it's usage | `{ bare: false }` |
+
+`@returns {string} The bare CSS variable or CSS variable usage`
 
 ```ts
 import { cssVariable } from 'themthem';
 
-cssVariable('global', 'color', 'black'); // var(--global-color-black)
-cssVariable('component', 'input', 'border-size'); // var(--input-border-size)
+cssVariable('global', 'color', 'black', { bare: true }); // "--global-color-black"
+cssVariable('global', 'color', 'black'); // "var(--global-color-black)"
 ```
 
-## Using with [`styled-components`](https://styled-components.com/)
+### generateGlobalCSSVariables(config)
 
-Themthem works great with styled-component or other CSS-in-JS libraries that work the same way.
-You can see an example [here](./examples/styled-components/)
+Generate CSS variables assignments for you global design tokens based on your theme.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| config | Object | A 2-level deep object assigning values to your global design tokens ||
+
+`@returns {string[]} An array of CSS variables declarations`
+
+```ts
+import { generateGlobalCSSVariables } from 'themthem';
+
+const globalVariablesAssignments = generateGlobalCSSVariables({
+    colors: {
+        black: '#000',
+        white: '#fff',
+        'my-custom-color': '#298af3'
+    },
+    sizes: {
+        sm: '4px',
+        md: '8px',
+        lg: '12px',
+        xl: '20px',
+    }
+});
+
+// [
+//   '--global-colors-black: #000;',
+//   '--global-colors-white: #fff;',
+//   '--global-colors-my-custom-color: #298af3;',
+//   '--global-sizes-sm: 4px;',
+//   '--global-sizes-md: 8px;',
+//   '--global-sizes-lg: 12px;',
+//   '--global-sizes-xl: 20px;'
+// ]
+```
+
+### createCSSVariableGenerator(component)
+
+Create a function which lets you generate CSS variables assignments for a component.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| component | `keyof Themthem['component']` | The name of the component ||
+
+`@returns {(config): string[]} A function which generates CSS variables assignments for the specified component`
+
+```ts
+import { createCSSVariablesGenerator } from 'themthem';
+
+const generateInputCSSVariables = createCSSVariablesGenerator('Input');
+
+const inputVariablesAssignments = generateInputCSSVariables({
+    'background-color': cssVariable('global', 'colors', 'white'),
+    'color': 'black',
+    'border-color': '#333',
+    'border-size': '1px'
+});
+
+// [
+//   '--input-background-color: var(--global-colors-white);',
+//   '--input-color: black;',
+//   '--input-border-color: #333;',
+//   '--input-border-size: 1px;',
+// ]
+```

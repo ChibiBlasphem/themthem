@@ -5,28 +5,29 @@ export interface Themthem {
   component: ComponentDesignTokenBox;
 }
 
-export type DTBoxType<T extends Themthem = Themthem> = keyof T;
+export type DTBoxType<ThemeInterface extends Themthem = Themthem> =
+  keyof ThemeInterface;
 
 export type DTBox<
-  TType extends DTBoxType<T>,
-  T extends Themthem = Themthem,
-> = T[TType];
+  Type extends DTBoxType<ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = ThemeInterface[Type];
 
 export type DTBoxKey<
-  TType extends DTBoxType<T>,
-  T extends Themthem = Themthem,
-> = keyof DTBox<TType, T>;
+  Type extends DTBoxType<ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = keyof DTBox<Type, ThemeInterface>;
 
 export type DesignTokens<
-  TType extends DTBoxType<T>,
-  C extends DTBoxKey<TType, T>,
-  T extends Themthem = Themthem,
-> = DTBox<TType, T>[C];
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = DTBox<Type, ThemeInterface>[Key];
 
 export type DesignToken<
-  TType extends DTBoxType<T>,
-  C extends DTBoxKey<TType, T>,
-  T extends Themthem = Themthem,
-> = DesignTokens<TType, C, T> extends string[]
-  ? DesignTokens<TType, C, T>[number]
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = DesignTokens<Type, Key, ThemeInterface> extends string[]
+  ? DesignTokens<Type, Key, ThemeInterface>[number]
   : never;

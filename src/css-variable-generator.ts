@@ -1,21 +1,22 @@
 import type { DTBoxKey, DesignToken, Themthem } from './token-box';
-import { cssToken } from './helpers';
+import { cssVariable } from './helpers';
 import { getKeys } from './utils';
 
-export function createCSSVariableGenerator<
-  C extends DTBoxKey<'component', T> & string,
-  T extends Themthem = Themthem,
->(component: C) {
+export function createCSSVariablesGenerator<
+  Key extends DTBoxKey<'component', ThemeInterface> & string,
+  ThemeInterface extends Themthem = Themthem,
+>(component: Key) {
   return function generateCSSVariables(config: {
-    [K in DesignToken<'component', C, T>]+?: string;
+    [Token in DesignToken<'component', Key, ThemeInterface>]+?: string;
   }) {
     const variables: string[] = [];
     for (const key of getKeys(config)) {
       variables.push(
-        `${cssToken<'component', C, typeof key, T>(
+        `${cssVariable<'component', Key, typeof key, ThemeInterface>(
           'component',
           component,
           key,
+          { bare: true },
         )}: ${config[key]};`,
       );
     }
@@ -24,10 +25,10 @@ export function createCSSVariableGenerator<
 }
 
 export function generateGlobalCSSVariables<
-  T extends Themthem = Themthem,
+  ThemeInterface extends Themthem = Themthem,
 >(config: {
-  [K in DTBoxKey<'global', T> & string]+?: {
-    [TK in DesignToken<'global', K, T>]+?: string;
+  [Key in DTBoxKey<'global', ThemeInterface> & string]+?: {
+    [Token in DesignToken<'global', Key, ThemeInterface>]+?: string;
   };
 }) {
   const variables: string[] = [];
@@ -36,7 +37,9 @@ export function generateGlobalCSSVariables<
     for (const token of getKeys(configValue)) {
       const variable = configValue[token];
       variables.push(
-        `${cssToken('global', key as never, token as never)}: ${variable};`,
+        `${cssVariable('global', key as never, token as never, {
+          bare: true,
+        })}: ${variable};`,
       );
     }
   }

@@ -1,8 +1,8 @@
+import { describe, it, expect } from 'vitest';
 import {
-  createCSSVariableGenerator,
+  createCSSVariablesGenerator,
   generateGlobalCSSVariables,
 } from './css-variable-generator';
-import { describe, it, expect } from 'vitest';
 
 interface TestThemthem {
   global: {
@@ -32,12 +32,12 @@ describe('generateGlobalCSSVariables', () => {
 
 describe('createCSSVariableGenerator', () => {
   it('should return a function', () => {
-    const result = createCSSVariableGenerator<'Foo', TestThemthem>('Foo');
+    const result = createCSSVariablesGenerator<'Foo', TestThemthem>('Foo');
     expect(result).toBeInstanceOf(Function);
   });
 
   it('should returns an array of css variable affections', () => {
-    const generateCSSVariables = createCSSVariableGenerator<
+    const generateCSSVariables = createCSSVariablesGenerator<
       'Foo',
       TestThemthem
     >('Foo');

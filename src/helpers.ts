@@ -1,35 +1,57 @@
 import { DTBoxType, DTBoxKey, DesignToken, Themthem } from './token-box';
 
-export type ThemthemToken<
-  TType extends DTBoxType<T>,
-  K extends DTBoxKey<TType, T> & string,
-  TToken extends DesignToken<TType, K, T>,
-  T extends Themthem = Themthem,
-> = TType extends 'global' ? `--global-${K}-${TToken}` : `--${K}-${TToken}`;
-
 export type ThemthemVariable<
-  TType extends DTBoxType<T>,
-  K extends DTBoxKey<TType, T> & string,
-  TToken extends DesignToken<TType, K, T>,
-  T extends Themthem = Themthem,
-> = `var(${ThemthemToken<TType, K, TToken, T>})`;
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface> & string,
+  Token extends DesignToken<Type, Key, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = Type extends 'global' ? `--global-${Key}-${Token}` : `--${Key}-${Token}`;
 
-export function cssToken<
-  TType extends DTBoxType<T>,
-  K extends DTBoxKey<TType, T> & string,
-  TToken extends DesignToken<TType, K, T>,
-  T extends Themthem = Themthem,
->(type: TType, key: K, token: TToken): ThemthemToken<TType, K, TToken, T> {
-  return (
-    type === 'global' ? `--global-${key}-${token}` : `--${key}-${token}`
-  ) as ThemthemToken<TType, K, TToken, T>;
-}
+export type ThemthemVariableUsage<
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface> & string,
+  Token extends DesignToken<Type, Key, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+> = `var(${ThemthemVariable<Type, Key, Token, ThemeInterface>})`;
 
 export function cssVariable<
-  TType extends DTBoxType<T>,
-  K extends DTBoxKey<TType, T> & string,
-  TToken extends DesignToken<TType, K, T>,
-  T extends Themthem = Themthem,
->(type: TType, key: K, token: TToken): ThemthemVariable<TType, K, TToken, T> {
-  return `var(${cssToken<TType, K, TToken, T>(type, key, token)})`;
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface> & string,
+  Token extends DesignToken<Type, Key, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+>(
+  type: Type,
+  key: Key,
+  token: Token,
+  options: { bare: true },
+): ThemthemVariable<Type, Key, Token, ThemeInterface>;
+export function cssVariable<
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface> & string,
+  Token extends DesignToken<Type, Key, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+>(
+  type: Type,
+  key: Key,
+  token: Token,
+  options?: { bare?: false },
+): ThemthemVariableUsage<Type, Key, Token, ThemeInterface>;
+export function cssVariable<
+  Type extends DTBoxType<ThemeInterface>,
+  Key extends DTBoxKey<Type, ThemeInterface> & string,
+  Token extends DesignToken<Type, Key, ThemeInterface>,
+  ThemeInterface extends Themthem = Themthem,
+>(
+  type: Type,
+  key: Key,
+  token: Token,
+  { bare = false }: { bare?: boolean } = {},
+):
+  | ThemthemVariable<Type, Key, Token, ThemeInterface>
+  | ThemthemVariableUsage<Type, Key, Token, ThemeInterface> {
+  const variable = (
+    type === 'global' ? `--global-${key}-${token}` : `--${key}-${token}`
+  ) as ThemthemVariable<Type, Key, Token, ThemeInterface>;
+
+  return bare ? variable : `var(${variable})`;
 }
