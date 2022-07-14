@@ -1,75 +1,23 @@
-/// <reference path="../interfaces.d.ts" />
-
-import type { TokenBoxKey, Token } from './token-box';
-import type { ThemthemVariable } from './helpers';
-import { cssToken } from './helpers';
+import type { DTBoxKey, DesignToken, Themthem } from './token-box';
+import { cssVariable } from './helpers';
 import { getKeys } from './utils';
 
-type GDT = GlobalDesignTokenBox;
-type CDT = ComponentDesignTokenBox;
-
-export type Source<C extends keyof GDT | keyof CDT> = C extends keyof GDT
-  ? GDT[C]
-  : C extends keyof CDT
-  ? CDT[C]
-  : never;
-
-export type Tuple<
-  C extends keyof GDT | keyof CDT = keyof GDT | keyof CDT,
-  T extends Source<C>[number] = Source<C>[number],
-> = [C, T];
-
-export type ExtractVariable<T extends Tuple> = T extends Tuple<
-  infer C,
-  infer CT
->
-  ? C extends TokenBoxKey<'global'>
-    ? CT extends Token<'global', C>
-      ? ThemthemVariable<'global', C, CT>
-      : never
-    : C extends TokenBoxKey<'component'>
-    ? CT extends Token<'component', C>
-      ? ThemthemVariable<'component', C, CT>
-      : never
-    : never
-  : never;
-
-export type ConfigTuple<K extends string = string, T extends Tuple = Tuple> = [
-  K,
-  T,
-];
-
-export type Merge<T> = { [K in keyof T]: T[K] };
-
-export type TupleToObject<T extends ConfigTuple> = T extends ConfigTuple<
-  infer K,
-  infer F
->
-  ? { [P in K]: ExtractVariable<F> }
-  : never;
-
-export type Config<
-  C extends TokenBoxKey<'component'>,
-  T extends ConfigTuple<Token<'component', C>>[],
-> = T extends [infer F extends ConfigTuple]
-  ? TupleToObject<F>
-  : T extends [
-      infer F extends ConfigTuple,
-      ...infer Rest extends ConfigTuple<Token<'component', C>>[],
-    ]
-  ? Merge<TupleToObject<F> & Config<C, Rest>>
-  : never;
-
-export function createCSSVariableGenerator<C extends TokenBoxKey<'component'>>(
-  component: C,
-) {
-  return function generateCSSVariables<CC extends Config<C, any>>(config: CC) {
+export function createCSSVariablesGenerator<
+  Key extends DTBoxKey<'component', ThemeInterface> & string,
+  ThemeInterface extends Themthem = Themthem,
+>(component: Key) {
+  return function generateCSSVariables(config: {
+    [Token in DesignToken<'component', Key, ThemeInterface>]+?: string;
+  }) {
     const variables: string[] = [];
     for (const key of getKeys(config)) {
       variables.push(
-        `${cssToken('component', component, key as Token<'component', C>)}: ${
-          config[key]
-        };`,
+        `${cssVariable<'component', Key, typeof key, ThemeInterface>(
+          'component',
+          component,
+          key,
+          { bare: true },
+        )}: ${config[key]};`,
       );
     }
     return variables;
@@ -77,20 +25,21 @@ export function createCSSVariableGenerator<C extends TokenBoxKey<'component'>>(
 }
 
 export function generateGlobalCSSVariables<
-  K extends TokenBoxKey<'global'>,
-  T extends Token<'global', K>,
+  ThemeInterface extends Themthem = Themthem,
 >(config: {
-  [k in K]: {
-    [t in T]: string;
+  [Key in DTBoxKey<'global', ThemeInterface> & string]+?: {
+    [Token in DesignToken<'global', Key, ThemeInterface>]+?: string;
   };
 }) {
   const variables: string[] = [];
   for (const key of getKeys(config)) {
-    for (const token of getKeys(config[key])) {
+    const configValue = config[key]!;
+    for (const token of getKeys(configValue)) {
+      const variable = configValue[token];
       variables.push(
-        `${cssToken('global', key, token as Token<K, T>)}: ${
-          config[key][token]
-        };`,
+        `${cssVariable('global', key as never, token as never, {
+          bare: true,
+        })}: ${variable};`,
       );
     }
   }
