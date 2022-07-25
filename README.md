@@ -4,6 +4,10 @@
 
 Themthem (pronounced like "temtem" `/temtem/`) is a library of tools which lets you manage your CSS variables and tokens based on a Typescript interface.
 
+## Work In Progress
+
+> Note that themthem API is currently not stable and can or will be changed until it's in a stable version 1.
+
 ## Install
 
 ```shell
