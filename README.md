@@ -33,8 +33,11 @@ In the root of your sources (eg: `./src`) create a `themthem-interfaces.d.ts` an
 /// <reference types="themthem/interfaces" />
 
 interface GlobalDesignTokenBox {
-    colors: ['black', 'white', 'my-custom-color'];
-    sizes: ['sm', 'md', 'lg', 'xl']
+    palette: ['black', 'white', 'my-custom-color'];
+    tokens: {
+        colors: ['default', 'accent']
+        sizes: ['sm', 'md', 'lg', 'xl']
+    }
 }
 ```
 
@@ -46,7 +49,12 @@ To define component token you need to augment `ComponentDesignTokenBox`. It's re
 /// <reference types="themthem/interfaces" />
 
 interface ComponentDesignTokenBox {
-    Input: ['background-color', 'color', 'border-color', 'border-size']
+    Input: {
+        border: {
+            default: ['color', 'size'],
+            focus: ['color', 'size']
+        } 
+    }
 }
 ```
 
@@ -55,24 +63,72 @@ interface ComponentDesignTokenBox {
 All the functions of the API is based on `GlobalDesignTokenBox` and `ComponentDesignTokenBox` by default.  
 So the example on this section will all be based on the augmentation done in the [Usage](#usage) section.
 
-### `cssVariable(type, key, token, options?)`
+### `gVar(path)`
 
-Generate a CSS Variable based on your theme.
+Generate a CSS variable usage (`var(--variable)`) based on your `GlobalDesignTokenBox`.
 
 | Parameter | Type | Description | Default value |
 |---|---|---|---|
-| type | `'global' \| 'component'` | The type of token you want. `'global'` for GlobalDesignTokens or `'component'` for ComponentDesignToken ||
-| key  | `keyof Themthem[typeof type]` | The global design token category or component name ||
-| token | `Themthem[typeof type][typeof key][number]` | The token token inside the category/component ||
-| options | `{ bare?: boolean } \| undefined` | Whether you want the bare css variable or it's usage | `{ bare: false }` |
+| path | `string` | The path to your token ||
 
-`@returns {string} The bare CSS variable or CSS variable usage`
+`@returns {string} The CSS variable usage of your token`
 
 ```ts
-import { cssVariable } from 'themthem';
+import { gVar } from 'themthem';
 
-cssVariable('global', 'color', 'black', { bare: true }); // "--global-color-black"
-cssVariable('global', 'color', 'black'); // "var(--global-color-black)"
+gVar('palette.black'); // "var(--global-palette-black)"
+gVar('tokens.colors.accent'); // "var(--global-tokens-colors-accent)"
+```
+
+### `gIdentifier(path)`
+
+Generate a CSS variable identifier (`--variable`) based on your `GlobalDesignTokenBox`.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| path | `string` | The path to your token ||
+
+`@returns {string} The CSS variable identifier of your token`
+
+```ts
+import { gIdentifier } from 'themthem';
+
+gIdentifier('palette.black'); // "--global-palette-black"
+gIdentifier('tokens.colors.accent'); // "--global-tokens-colors-accent"
+```
+
+### `cVar(path)`
+
+Generate a CSS variable usage (`var(--variable)`) based on your `ComponentDesignTokenBox`.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| path | `string` | The path to your token ||
+
+`@returns {string} The CSS Variable usage of your token`
+
+```ts
+import { cVar } from 'themthem';
+
+cVar('Input.border.default.color'); // "var(--component-Input-border-default-color)"
+cVar('Input.border.focus.color'); // "var(--component-Input-border-focus-color)"
+```
+
+### `cIdentifier(path)`
+
+Generate a CSS variable identifier (`--variable`) based on your `ComponentDesignTokenBox`.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| path | `string` | The path to your token ||
+
+`@returns {string} The CSS variable identifier of your token`
+
+```ts
+import { cIdentifier } from 'themthem';
+
+cIdentifier('Input.border.default.color'); // "--component-Input-border-default-color"
+cIdentifier('Input.border.focus.color'); // "--component-Input-border-focus-color"
 ```
 
 ### generateGlobalCSSVariables(config)
@@ -81,7 +137,7 @@ Generate CSS variables assignments for you global design tokens based on your th
 
 | Parameter | Type | Description | Default value |
 |---|---|---|---|
-| config | Object | A 2-level deep object assigning values to your global design tokens ||
+| config | Object | A config object assigning values to your global design tokens ||
 
 `@returns {string[]} An array of CSS variables declarations`
 
@@ -89,31 +145,81 @@ Generate CSS variables assignments for you global design tokens based on your th
 import { generateGlobalCSSVariables } from 'themthem';
 
 const globalVariablesAssignments = generateGlobalCSSVariables({
-    colors: {
+    palette: {
         black: '#000',
         white: '#fff',
-        'my-custom-color': '#298af3'
+        'my-custom-color': '#298af3',
     },
-    sizes: {
-        sm: '4px',
-        md: '8px',
-        lg: '12px',
-        xl: '20px',
-    }
+    tokens: {
+        colors: {
+            default: gVar('palette.black'),
+            accent: gVar('palette.my-custom-color'),
+        },
+        sizes: {
+            sm: '4px',
+            md: '8px',
+            lg: '12px',
+            xl: '20px',
+        },
+    },
 });
 
+// Returns:
+//
 // [
-//   '--global-colors-black: #000;',
-//   '--global-colors-white: #fff;',
-//   '--global-colors-my-custom-color: #298af3;',
-//   '--global-sizes-sm: 4px;',
-//   '--global-sizes-md: 8px;',
-//   '--global-sizes-lg: 12px;',
-//   '--global-sizes-xl: 20px;'
+//   '--global-palette-black: #000;',
+//   '--global-palette-white: #fff;',
+//   '--global-palette-my-custom-color: #298af3;',
+//   '--global-tokens-colors-default: var(--global-palette-black);',
+//   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
+//   '--global-tokens-sizes-sm: 4px;',
+//   '--global-tokens-sizes-md: 8px;',
+//   '--global-tokens-sizes-lg: 12px;',
+//   '--global-tokens-sizes-xl: 20px;',
 // ]
 ```
 
-### createCSSVariableGenerator(component)
+### createGlobalCSSVariablesGenerator(path)
+
+Create a function which lets you generate CSS variables assignments for a part of your global design tokens.
+
+| Parameter | Type | Description | Default value |
+|---|---|---|---|
+| path | `string` | The path to the part of the theme you want to configure ||
+
+`@returns {(config): string[]} A function which generates CSS variables assignments for the specified part of your global design`
+
+```ts
+import { createGlobalCSSVariableGenerator } from 'themthem';
+
+const generateColorsTokensVariables = createGlobalCSSVariableGenerator('tokens.colors');
+
+const lightThemeColorsTokens = generateGlobalCSSVariables({
+    default: gVar('palette.black'),
+    accent: gVar('palette.my-custom-color'),
+});
+
+// Returns:
+//
+// [
+//   '--global-tokens-colors-default: var(--global-palette-black);',
+//   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
+// ]
+
+const darkThemeColorsTokens = generateGlobalCSSVariables({
+    default: gVar('palette.white'),
+    accent: gVar('palette.my-custom-color'),
+});
+
+// Returns:
+//
+// [
+//   '--global-tokens-colors-default: var(--global-palette-white);',
+//   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
+// ]
+```
+
+### createComponentCSSVariableGenerator(component)
 
 Create a function which lets you generate CSS variables assignments for a component.
 
@@ -129,16 +235,22 @@ import { createCSSVariablesGenerator } from 'themthem';
 const generateInputCSSVariables = createCSSVariablesGenerator('Input');
 
 const inputVariablesAssignments = generateInputCSSVariables({
-    'background-color': cssVariable('global', 'colors', 'white'),
-    'color': 'black',
-    'border-color': '#333',
-    'border-size': '1px'
+    border: {
+        default: {
+            color: gVar('palette.black'),
+            size: '1px',
+        },
+        focus: {
+            color: gVar('tokens.colors.accent'),
+            size: '2px'
+        }
+    },
 });
 
 // [
-//   '--input-background-color: var(--global-colors-white);',
-//   '--input-color: black;',
-//   '--input-border-color: #333;',
-//   '--input-border-size: 1px;',
+//   '--component-Input-border-default-color: var(--global-palette-black);',
+//   '--component-Input-border-default-size: 1px;',
+//   '--component-Input-border-focus-color: var(--global-tokens-colors-accent);',
+//   '--component-Input-border-focus-size: 2px;',
 // ]
 ```

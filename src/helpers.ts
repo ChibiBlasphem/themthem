@@ -1,57 +1,47 @@
-import { DTBoxType, DTBoxKey, DesignToken, Themthem } from './token-box';
+import type { Themthem, TokenPath } from './token-box';
 
-export type ThemthemVariable<
-  Type extends DTBoxType<ThemeInterface>,
-  Key extends DTBoxKey<Type, ThemeInterface> & string,
-  Token extends DesignToken<Type, Key, ThemeInterface>,
-  ThemeInterface extends Themthem = Themthem,
-> = Type extends 'global' ? `--global-${Key}-${Token}` : `--${Key}-${Token}`;
+export type Segments<Keys extends string> = Keys extends `${infer Key}.${infer RestKeys}`
+  ? `${Key}-${Segments<RestKeys>}`
+  : Keys;
 
-export type ThemthemVariableUsage<
-  Type extends DTBoxType<ThemeInterface>,
-  Key extends DTBoxKey<Type, ThemeInterface> & string,
-  Token extends DesignToken<Type, Key, ThemeInterface>,
-  ThemeInterface extends Themthem = Themthem,
-> = `var(${ThemthemVariable<Type, Key, Token, ThemeInterface>})`;
+export type ThemthemGlobalVariable<
+  Box extends object,
+  Keys extends TokenPath<Box>,
+> = `--global-${Segments<Keys>}`;
 
-export function cssVariable<
-  Type extends DTBoxType<ThemeInterface>,
-  Key extends DTBoxKey<Type, ThemeInterface> & string,
-  Token extends DesignToken<Type, Key, ThemeInterface>,
-  ThemeInterface extends Themthem = Themthem,
->(
-  type: Type,
-  key: Key,
-  token: Token,
-  options: { bare: true },
-): ThemthemVariable<Type, Key, Token, ThemeInterface>;
-export function cssVariable<
-  Type extends DTBoxType<ThemeInterface>,
-  Key extends DTBoxKey<Type, ThemeInterface> & string,
-  Token extends DesignToken<Type, Key, ThemeInterface>,
-  ThemeInterface extends Themthem = Themthem,
->(
-  type: Type,
-  key: Key,
-  token: Token,
-  options?: { bare?: false },
-): ThemthemVariableUsage<Type, Key, Token, ThemeInterface>;
-export function cssVariable<
-  Type extends DTBoxType<ThemeInterface>,
-  Key extends DTBoxKey<Type, ThemeInterface> & string,
-  Token extends DesignToken<Type, Key, ThemeInterface>,
-  ThemeInterface extends Themthem = Themthem,
->(
-  type: Type,
-  key: Key,
-  token: Token,
-  { bare = false }: { bare?: boolean } = {},
-):
-  | ThemthemVariable<Type, Key, Token, ThemeInterface>
-  | ThemthemVariableUsage<Type, Key, Token, ThemeInterface> {
-  const variable = (
-    type === 'global' ? `--global-${key}-${token}` : `--${key}-${token}`
-  ) as ThemthemVariable<Type, Key, Token, ThemeInterface>;
+export type ThemthemComponentVariable<
+  Box extends object,
+  Keys extends TokenPath<Box>,
+> = `--component-${Segments<Keys>}`;
 
-  return bare ? variable : `var(${variable})`;
+export type ThemthemVariableUsage<Variable extends string> = `var(${Variable})`;
+
+export function gIdentifier<
+  TI extends Themthem = Themthem,
+  Path extends TokenPath<TI['global']> = TokenPath<TI['global']>,
+>(path: Path): ThemthemGlobalVariable<TI['global'], Path> {
+  const token = path.split('.').join('-') as Segments<Path>;
+  return `--global-${token}`;
+}
+
+export function gVar<
+  TI extends Themthem = Themthem,
+  Path extends TokenPath<TI['global']> = TokenPath<TI['global']>,
+>(path: Path): ThemthemVariableUsage<ThemthemGlobalVariable<TI['global'], Path>> {
+  return `var(${gIdentifier<TI, Path>(path)})`;
+}
+
+export function cIdentifier<
+  TI extends Themthem = Themthem,
+  Path extends TokenPath<TI['component']> = TokenPath<TI['component']>,
+>(path: Path): ThemthemComponentVariable<TI['component'], Path> {
+  const token = path.split('.').join('-') as Segments<Path>;
+  return `--component-${token}`;
+}
+
+export function cVar<
+  TI extends Themthem = Themthem,
+  Path extends TokenPath<TI['component']> = TokenPath<TI['component']>,
+>(path: Path): ThemthemVariableUsage<ThemthemComponentVariable<TI['component'], Path>> {
+  return `var(${cIdentifier<TI, Path>(path)})`;
 }
