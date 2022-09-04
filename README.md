@@ -33,10 +33,11 @@ In the root of your sources (eg: `./src`) create a `themthem-interfaces.d.ts` an
 /// <reference types="themthem/interfaces" />
 
 interface GlobalDesignTokenBox {
-    palette: ['black', 'white', 'my-custom-color'];
+    // This is a Values object and show that 'black', 'white' and 'my-custom-color' are values
+    palette: { $values: ['black', 'white', 'my-custom-color'] };
     tokens: {
-        colors: ['default', 'accent']
-        sizes: ['sm', 'md', 'lg', 'xl']
+        colors: { $values: ['base', 'accent'] }
+        sizes: { $values: ['sm', 'md', 'lg', 'xl'] }
     }
 }
 ```
@@ -50,13 +51,23 @@ To define component token you need to augment `ComponentDesignTokenBox`. It's re
 
 interface ComponentDesignTokenBox {
     Input: {
+        // This is a Values object and show that 'color' is a value
+        $values: ['color']; 
         border: {
-            default: ['color', 'size'],
-            focus: ['color', 'size']
+            // This is a Modifiers object and show that 'size'
+            // can have a "$default" value and a "$focus" value
+            size: {
+                $modifiers: ['focus'];
+            };
+            color: {
+                $modifiers: ['focus'];
+            };
         } 
     }
 }
 ```
+
+All the final tokens of your Token Box must be either a Value object or a Modifiers object.
 
 ## API
 
@@ -110,8 +121,8 @@ Generate a CSS variable usage (`var(--variable)`) based on your `ComponentDesign
 ```ts
 import { cVar } from 'themthem';
 
-cVar('Input.border.default.color'); // "var(--component-Input-border-default-color)"
-cVar('Input.border.focus.color'); // "var(--component-Input-border-focus-color)"
+cVar('Input.border.color'); // "var(--component-Input-border-color)"
+cVar('Input.border.color.$focus'); // "var(--component-Input-border-color__focus)"
 ```
 
 ### `cIdentifier(path)`
@@ -127,8 +138,8 @@ Generate a CSS variable identifier (`--variable`) based on your `ComponentDesign
 ```ts
 import { cIdentifier } from 'themthem';
 
-cIdentifier('Input.border.default.color'); // "--component-Input-border-default-color"
-cIdentifier('Input.border.focus.color'); // "--component-Input-border-focus-color"
+cIdentifier('Input.border.color'); // "--component-Input-border-color"
+cIdentifier('Input.border.color.$focus'); // "--component-Input-border-color__focus"
 ```
 
 ### generateGlobalCSSVariables(config)
@@ -152,7 +163,7 @@ const globalVariablesAssignments = generateGlobalCSSVariables({
     },
     tokens: {
         colors: {
-            default: gVar('palette.black'),
+            base: gVar('palette.black'),
             accent: gVar('palette.my-custom-color'),
         },
         sizes: {
@@ -170,7 +181,7 @@ const globalVariablesAssignments = generateGlobalCSSVariables({
 //   '--global-palette-black: #000;',
 //   '--global-palette-white: #fff;',
 //   '--global-palette-my-custom-color: #298af3;',
-//   '--global-tokens-colors-default: var(--global-palette-black);',
+//   '--global-tokens-colors-base: var(--global-palette-black);',
 //   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
 //   '--global-tokens-sizes-sm: 4px;',
 //   '--global-tokens-sizes-md: 8px;',
@@ -194,27 +205,27 @@ import { createGlobalCSSVariableGenerator } from 'themthem';
 
 const generateColorsTokensVariables = createGlobalCSSVariableGenerator('tokens.colors');
 
-const lightThemeColorsTokens = generateGlobalCSSVariables({
-    default: gVar('palette.black'),
+const lightThemeColorsTokens = generateColorsTokensVariables({
+    base: gVar('palette.black'),
     accent: gVar('palette.my-custom-color'),
 });
 
 // Returns:
 //
 // [
-//   '--global-tokens-colors-default: var(--global-palette-black);',
+//   '--global-tokens-colors-base: var(--global-palette-black);',
 //   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
 // ]
 
-const darkThemeColorsTokens = generateGlobalCSSVariables({
-    default: gVar('palette.white'),
+const darkThemeColorsTokens = generateColorsTokensVariables({
+    base: gVar('palette.white'),
     accent: gVar('palette.my-custom-color'),
 });
 
 // Returns:
 //
 // [
-//   '--global-tokens-colors-default: var(--global-palette-white);',
+//   '--global-tokens-colors-base: var(--global-palette-white);',
 //   '--global-tokens-colors-accent: var(--global-palette-my-custom-color);',
 // ]
 ```
@@ -236,21 +247,23 @@ const generateInputCSSVariables = createCSSVariablesGenerator('Input');
 
 const inputVariablesAssignments = generateInputCSSVariables({
     border: {
-        default: {
-            color: gVar('palette.black'),
-            size: '1px',
+        // Input.border.color -> { $modifiers: ['focus'] }
+        color: {
+            $default: gVar('palette.black'),
+            $focus: gVar('tokens.colors.accent')
         },
-        focus: {
-            color: gVar('tokens.colors.accent'),
-            size: '2px'
+        // Input.border.size -> { $modifiers: ['focus'] }
+        size: {
+            $default: '1px',
+            $focus: '2px'
         }
     },
 });
 
 // [
-//   '--component-Input-border-default-color: var(--global-palette-black);',
-//   '--component-Input-border-default-size: 1px;',
-//   '--component-Input-border-focus-color: var(--global-tokens-colors-accent);',
-//   '--component-Input-border-focus-size: 2px;',
+//   '--component-Input-border-color: var(--global-palette-black);',
+//   '--component-Input-border-color__focus: var(--global-tokens-colors-accent);',
+//   '--component-Input-border-size: 1px;',
+//   '--component-Input-border-size__focus: 2px;',
 // ]
 ```

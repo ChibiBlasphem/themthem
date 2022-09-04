@@ -3,17 +3,20 @@ import { gIdentifier, gVar, cIdentifier, cVar } from './helpers';
 
 interface TestThemthem {
   global: {
-    foo: ['bar'];
-    bar: { baz: [''] };
+    foo: { $values: ['bar'] };
+    bar: { $values: ['baz'] };
     baz: {
-      test: ['foo'];
+      test: { $values: ['foo'] };
     };
   };
   component: {
-    Foo: ['bar'];
-    Bar: { baz: [''] };
+    Foo: { $values: ['bar'] };
+    Bar: { $values: ['baz'] };
     Baz: {
-      test: ['foo'];
+      test: { $values: ['foo'] };
+      foo: {
+        $modifiers: ['mod1', 'mod2'];
+      };
     };
   };
 }
@@ -48,6 +51,10 @@ describe('component', () => {
       expect(cVar<TestThemthem, 'Baz.test.foo'>('Baz.test.foo')).toBe(
         'var(--component-Baz-test-foo)',
       );
+      expect(cVar<TestThemthem, 'Baz.foo.$mod1'>('Baz.foo.$mod1')).toBe(
+        'var(--component-Baz-foo__mod1)',
+      );
+      expect(cVar<TestThemthem, 'Baz.foo'>('Baz.foo')).toBe('var(--component-Baz-foo)');
       expect(cVar<TestThemthem, 'Baz.test.foo', '10px'>('Baz.test.foo', '10px')).toBe(
         'var(--component-Baz-test-foo, 10px)',
       );

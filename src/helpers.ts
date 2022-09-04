@@ -1,7 +1,11 @@
 import type { Themthem, TokenPath } from './token-box';
 
 export type Segments<Keys extends string> = Keys extends `${infer Key}.${infer RestKeys}`
-  ? `${Key}-${Segments<RestKeys>}`
+  ? RestKeys extends `$default`
+    ? Key
+    : RestKeys extends `$${infer R}`
+    ? `${Key}__${Segments<R>}`
+    : `${Key}-${Segments<RestKeys>}`
   : Keys;
 
 export type ThemthemGlobalVariableName<
@@ -25,12 +29,17 @@ export type ThemthemVariableUsage<
   DefaultValue extends string | undefined,
 > = `var(${Variable}${DefaultValuePart<DefaultValue>})`;
 
+function variabilize<Path extends string>(path: Path): Segments<Path> {
+  return path.split('.').reduce((acc, s) => {
+    return s === '$default' ? acc : s.startsWith('$') ? `${acc}__${s.slice(1)}` : `${acc}-${s}`;
+  }) as Segments<Path>;
+}
+
 export function gIdentifier<
   TI extends Themthem = Themthem,
   Path extends TokenPath<TI['global']> = TokenPath<TI['global']>,
 >(path: Path): ThemthemGlobalVariableName<TI['global'], Path> {
-  const token = path.split('.').join('-') as Segments<Path>;
-  return `--global-${token}`;
+  return `--global-${variabilize(path)}`;
 }
 
 export function gVar<
@@ -50,8 +59,7 @@ export function cIdentifier<
   TI extends Themthem = Themthem,
   Path extends TokenPath<TI['component']> = TokenPath<TI['component']>,
 >(path: Path): ThemthemComponentVariableName<TI['component'], Path> {
-  const token = path.split('.').join('-') as Segments<Path>;
-  return `--component-${token}`;
+  return `--component-${variabilize(path)}`;
 }
 
 export function cVar<

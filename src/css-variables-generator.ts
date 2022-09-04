@@ -2,11 +2,28 @@ import type { PartialTokenPath, Themthem, TokenPath } from './token-box';
 import { cIdentifier, gIdentifier } from './helpers';
 import { getKeys } from './utils';
 
-export type GeneratorConfig<Box extends object> = Box extends string[]
-  ? { [Key in Box[number]]+?: string }
-  : {
-      [Key in keyof Box & string]+?: Box[Key] extends object ? GeneratorConfig<Box[Key]> : never;
-    };
+type BoxValues<Box> = {
+  [k in '$values' extends keyof Box
+    ? Box['$values'] extends string[]
+      ? Box['$values'][number]
+      : never
+    : never]+?: string;
+};
+
+type BoxModifiers<Box> = {
+  [k in '$modifiers' extends keyof Box
+    ? Box['$modifiers'] extends string[]
+      ? `$${Box['$modifiers'][number]}` | '$default'
+      : never
+    : never]+?: string;
+};
+
+export type GeneratorConfig<Box> = BoxValues<Box> &
+  BoxModifiers<Box> & {
+    [k in keyof (Omit<Box, '$values' | '$modifiers'> extends object
+      ? Omit<Box, '$values' | '$modifiers'>
+      : never)]+?: GeneratorConfig<Box[k]>;
+  };
 
 export type CSSVariableGenerator<Box extends object> = (config: GeneratorConfig<Box>) => string[];
 

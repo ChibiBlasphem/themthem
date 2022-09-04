@@ -8,23 +8,33 @@ import { gVar } from './helpers';
 
 interface TestThemthem {
   global: {
-    foo: ['bar'];
-    bar: ['baz'];
+    foo: { $values: ['bar'] };
+    bar: {
+      $values: ['baz'];
+      color: {
+        $modifiers: ['hover', 'disabled'];
+      };
+    };
   };
   component: {
-    Foo: ['bar'];
-    Baz: ['baz'];
+    Foo: {
+      $values: ['bar'];
+      color: {
+        $modifiers: ['hover', 'disabled'];
+      };
+    };
+    Baz: { $values: ['baz'] };
   };
 }
 
 interface UsageTheme {
   global: {
-    palette: ['black', 'white', 'my-custom-color'];
+    $values: ['uniqueToken'];
+    palette: { $values: ['black', 'white', 'my-custom-color'] };
     tokens: {
-      colors: ['default', 'accent'];
-      sizes: ['sm', 'md', 'lg', 'xl'];
+      colors: { $values: ['default', 'accent'] };
+      sizes: { $values: ['sm', 'md', 'lg', 'xl'] };
     };
-    uniqueToken: [''];
   };
   component: {};
 }
@@ -38,9 +48,20 @@ describe('generateGlobalCSSVariables', () => {
         },
         bar: {
           baz: 'other-value',
+          color: {
+            $default: 'default-color',
+            $hover: 'hover-color',
+            $disabled: 'disabled-color',
+          },
         },
       }),
-    ).toEqual(['--global-foo-bar: value;', '--global-bar-baz: other-value;']);
+    ).toEqual([
+      '--global-foo-bar: value;',
+      '--global-bar-baz: other-value;',
+      '--global-bar-color: default-color;',
+      '--global-bar-color__hover: hover-color;',
+      '--global-bar-color__disabled: disabled-color;',
+    ]);
 
     const expected = [
       '--global-palette-black: #000;',
@@ -74,9 +95,7 @@ describe('generateGlobalCSSVariables', () => {
             xl: '20px',
           },
         },
-        uniqueToken: {
-          '': '#333',
-        },
+        uniqueToken: '#333',
       }),
     ).toEqual(expected);
   });
@@ -91,11 +110,18 @@ describe('createGlobalCSSVariableGenerator', () => {
   });
 });
 
-describe('createCSSVariableGenerator', () => {
+describe('createComponentCSSVariablesGenerator', () => {
   it('should returns a variable generator scoped to the path specified', () => {
     const fn = createComponentCSSVariablesGenerator<TestThemthem, 'Foo'>('Foo');
     expect(fn).toBeInstanceOf(Function);
 
-    expect(fn({ bar: 'value' })).toEqual(['--component-Foo-bar: value;']);
+    expect(
+      fn({ bar: 'value', color: { $default: 'default', $hover: 'hover', $disabled: 'disabled' } }),
+    ).toEqual([
+      '--component-Foo-bar: value;',
+      '--component-Foo-color: default;',
+      '--component-Foo-color__hover: hover;',
+      '--component-Foo-color__disabled: disabled;',
+    ]);
   });
 });
