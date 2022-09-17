@@ -18,20 +18,32 @@
     "url": "https://github.com/ChibiBlasphem/themthem.git"
   },
   "types": "./dist/index.d.ts",
-  "main": "./dist/themthem.umd.js",
+  "main": "./dist/themthem.cjs.js",
   "module": "./dist/themthem.es.js",
   "files": [
-    "./dist",
-    "./interfaces.d.ts"
+    "dist",
+    "*.d.ts"
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/themthem.es.js",
-      "require": "./dist/themthem.umd.js"
+      "require": "./dist/themthem.cjs.js"
+    },
+    "./component": {
+      "types": "./dist/component.d.ts",
+      "import": "./dist/component.es.js",
+      "require": "./dist/component.cjs.js"
+    },
+    "./global": {
+      "types": "./dist/global.d.ts",
+      "import": "./dist/global.es.js",
+      "require": "./dist/global.cjs.js"
     }
   },
   "scripts": {
-    "build": "tsc --noEmit && vite build && tsc --emitDeclarationOnly && node ./scripts/typescript-replace.js",
+    "build": "tsc --noEmit && vite build && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "postbuild": "node ./scripts/make-dts",
     "test": "vitest --run --passWithNoTests",
     "prepare": "husky install"
   },
