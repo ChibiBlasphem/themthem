@@ -74,12 +74,12 @@ export function createGlobalCSSVariablesGenerator<
   TI extends Themthem = Themthem,
   Path extends PartialTokenPath<TI['global']> = PartialTokenPath<TI['global']>,
 >(
-  p: Path,
+  path: Path,
 ): CSSVariableGenerator<
   TokenBoxFromPath<Path, TI['global']> extends object ? TokenBoxFromPath<Path, TI['global']> : never
 > {
   return (config) => {
-    const assignments = generateAssignments(p, config);
+    const assignments = generateAssignments(path, config);
     const stringAssignments: string[] = [];
 
     for (const { path, value } of assignments) {
@@ -92,16 +92,16 @@ export function createGlobalCSSVariablesGenerator<
 
 export function createComponentCSSVariablesGenerator<
   TI extends Themthem = Themthem,
-  Key extends keyof TI['component'] & string = keyof TI['component'] & string,
+  Path extends PartialTokenPath<TI['component']> = PartialTokenPath<TI['component']>,
 >(
-  key: Key,
+  path: Path,
 ): CSSVariableGenerator<
-  TokenBoxFromPath<Key, TI['component']> extends object
-    ? TokenBoxFromPath<Key, TI['component']>
+  TokenBoxFromPath<Path, TI['component']> extends object
+    ? TokenBoxFromPath<Path, TI['component']>
     : never
 > {
   return (config) => {
-    const assignments = generateAssignments(key, config);
+    const assignments = generateAssignments(path, config);
     const stringAssignments: string[] = [];
 
     for (const { path, value } of assignments) {

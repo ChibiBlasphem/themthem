@@ -112,14 +112,25 @@ describe('createGlobalCSSVariableGenerator', () => {
 
 describe('createComponentCSSVariablesGenerator', () => {
   it('should returns a variable generator scoped to the path specified', () => {
-    const fn = createComponentCSSVariablesGenerator<TestThemthem, 'Foo'>('Foo');
-    expect(fn).toBeInstanceOf(Function);
+    const fnComponent = createComponentCSSVariablesGenerator<TestThemthem, 'Foo'>('Foo');
+    expect(fnComponent).toBeInstanceOf(Function);
 
     expect(
-      fn({ bar: 'value', color: { $default: 'default', $hover: 'hover', $disabled: 'disabled' } }),
+      fnComponent({
+        bar: 'value',
+        color: { $default: 'default', $hover: 'hover', $disabled: 'disabled' },
+      }),
     ).toEqual([
       '--component-Foo-bar: value;',
       '--component-Foo-color: default;',
+      '--component-Foo-color__hover: hover;',
+      '--component-Foo-color__disabled: disabled;',
+    ]);
+
+    const fnOnPath = createComponentCSSVariablesGenerator<TestThemthem, 'Foo.color'>('Foo.color');
+    expect(fnOnPath).toBeInstanceOf(Function);
+
+    expect(fnOnPath({ $hover: 'hover', $disabled: 'disabled' })).toEqual([
       '--component-Foo-color__hover: hover;',
       '--component-Foo-color__disabled: disabled;',
     ]);
